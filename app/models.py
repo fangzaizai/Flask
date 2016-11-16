@@ -1,8 +1,13 @@
 #-*- coding: utf-8 -*-
 from flask_sqlalchemy import SQLAlchemy
-from . import db
+from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
+@login_manager.user_loader
+def load_user(user_id):
+	#如果找到用户，返回用户对象，否则返回None
+	return User.query.get(int(user_id))  
 
 class Role(db.Model):
 	__tablename__ = 'roles'
@@ -17,6 +22,7 @@ class User(db.Model):
 	"""docstring for User"""
 	__tablename__ = 'users'
 	id = db.Column(db.Integer, primary_key=True)
+	email = db.Column(db.String(64), unique=True, index=True)
 	username = db.Column(db.String(64), unique=True, index=True)
 	password_hash = db.Column(db.String(128))
 	role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
