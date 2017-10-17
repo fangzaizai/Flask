@@ -11,7 +11,7 @@ class Role(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(64), unique=True)
 	users = db.relationship('User', backref='role', lazy='dynamic')  #?
-	
+	confirmed = db.Column(db.Boolean, default=False)
 
 	def __repr__(self):
 		return '<Role %r>' % self.name
@@ -24,7 +24,6 @@ class User(UserMixin, db.Model):
 	username = db.Column(db.String(64), unique=True, index=True)
 	password_hash = db.Column(db.String(128))
 	role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-	confirmed = db.Column(db.Boolean, default=False)
 	#用于将对象打印出来，将属性和方法整理成一个可以打印输出的格式
 	#def __repr__(self):
 		#return '<User %r>' % self.username
@@ -43,7 +42,7 @@ class User(UserMixin, db.Model):
 	#生成一个；令牌
 	def generate_confirmation_token(self, expiration=3600):
 		s = Serializer(current_app.config['SECRET_KEY'], expiration)
-		return s.dumps({'confirm': self.id})
+		return s.dump({'confirm': self.id})
 
 	#检验令牌
 	def confirm(self, token):
